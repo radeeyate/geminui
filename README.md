@@ -5,6 +5,7 @@
 I had the need to use some AI models at school, particularly the Google Gemini models. Unfortunately, my school disallows the use on our personal accounts. I made a web dashboard that lets you use multiple Gemini models (`gemini-1.5-flash-8b`, `gemini-1.5-flash`, `gemini-2.0-flash-exp`) from a simple interface. It's written in Golang, and uses the Bulma CSS framework.
 
 ![screenshot of dashboard](./media/web.png)
+![screenshot of chat](./media/chat.png)
 
 It supports Markdown responses, and renders them in real time as messages come in. It supports a model switcher, and eventually file uploading.
 
