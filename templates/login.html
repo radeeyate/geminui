@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeminUI - Login</title>
+  <link rel="stylesheet" href="/static/bulma.css" />
+</head>
+
+<body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">GeminUI - Login</h1>
+      <form method="POST" action="/login">
+        <div class="field">
+          <label for="email" class="label">Email</label>
+          <input type="text" id="email" name="email" placeholder="Student Email" class="input" required />
+        </div>
+
+        {{ if .Error }}
+        <p class="has-text-danger">{{ .Error }}</p>
+        {{ end }}
+
+        <div class="control">
+          <button type="submit" class="button">Login</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</body>
+
+</html>

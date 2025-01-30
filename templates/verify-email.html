@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeminUI - Login</title>
+    <link rel="stylesheet" href="/static/bulma.css">
+</head>
+
+<body>
+    <section class="section">
+        <div class="container">
+            <h1 class="title">GeminUI - Verify Email</h1>
+            <form method="POST" action="/verify/{{ .ID }}">
+                <div class="field">
+                    <label for="otp" class="label">One time password</label>
+                    <input type="text" id="otp" name="otp" placeholder="One-time password" class="input">
+                </div>
+
+                {{ if .Error }}
+                <p class="has-text-danger">{{ .Error }}</p>
+                {{ end }}
+
+                <div class="control">
+                    <button type="submit" class="button">Confirm</button>
+                </div>
+            </form>
+        </div>
+    </section>
+</body>
+
+</html>

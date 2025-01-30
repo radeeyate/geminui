@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeminUI - Chat</title>
+    <script src="https://unpkg.com/showdown/dist/showdown.min.js"></script>
+    <script src="https://unpkg.com/dompurify@3.1.7/dist/purify.min.js"></script>
+    <script src="/static/script.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="/static/bulma.css">
+    <link rel="stylesheet" href="/static/style.css"> <!-- styles that I can't apply with bulma -->
+    <script src="https://unpkg.com/htmx.org@2.0.2"
+        integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ"
+        crossorigin="anonymous"></script>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+    <link rel="manifest" href="/static/site.webmanifest">
+</head>
+
+<body onload="document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;">
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="/">
+                <img src="/static/gemini.png">
+                <strong>GeminUI</strong>
+            </a>
+
+            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                data-target="navbarBasicExample">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
+
+        <div id="navbarBasicExample" class="navbar-menu">
+            <div class="navbar-start">
+            </div>
+
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <div class="field">
+                        <div class="control">
+                            <div class="select">
+                                <select id="model-select" disabled="true">
+                                    <option value="gemini-2.0-flash-exp" {{ if eq .Chat.Model "gemini-2.0-flash-exp"
+                                        }}selected{{ end }}>gemini-2.0-flash-exp</option>
+                                    <option value="gemini-1.5-flash-8b" {{ if eq .Chat.Model "gemini-1.5-flash-8b"
+                                        }}selected{{ end }}>gemini-1.5-flash-8b</option>
+                                    <option value="gemini-1.5-flash" {{ if eq .Chat.Model "gemini-1.5-flash"
+                                        }}selected{{ end }}>gemini-1.5-flash</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="navbar-item">
+                    <div class="buttons">
+                        <a href="/logout" class="button is-danger">
+                            Log out
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="section">
+
+        <aside class="menu sidebar p-4">
+            <p class="menu-label">
+                Chats
+            </p>
+            <ul class="menu-list" id="chat-list">
+                <li><a href="/" hx-boost="true" class="is-active"
+                        style="line-height: 0.8; display: inline-flex; align-items: center; margin-bottom: 2px;"><span
+                            class="material-icons" style="">add</span> New
+                        Chat</a></li>
+
+                {{ with .Chat }}
+                {{ $currentChat := . }}
+                {{ range $.Chats }}
+                <li>
+                    <div class="chat-item">
+                        <a href="/chat/{{ idtostring .ID }}" hx-boost="true" {{ if eq $currentChat.ID .ID
+                            }}class="is-active" {{ end }}>{{ .Title }}</a>
+                        <span class="material-icons delete-button" onclick="deleteChat('{{ idtostring .ID }}')">
+                            delete
+                        </span>
+                    </div>
+                </li>
+                {{ end }}
+                {{ end }}
+            </ul>
+        </aside>
+        <div class="main-content">
+            <div class="container">
+                <div class="box" id="messages">
+                    {{ range .Chat.History }}
+                    <article class="message">
+                        <div class="message-header">
+                            {{ replace (replace .Role "model" "Gemini") "user" "You" }}
+                        </div>
+                        <div class="message-body content">
+                            {{ range .Parts }}
+                            {{ htmlSafe (mdtohtml .) }}
+                            {{ end }}
+                        </div>
+                    </article>
+                    {{ end }}
+                </div>
+                <div class="field has-addons is-flex is-justify-content-center is-widescreen">
+                    <div class="control is-expanded">
+                        <textarea type="text" id="question" placeholder="Type something" class="input"></textarea>
+                    </div>
+                    <div class="control">
+                        <button id="send" onclick="askGemini()" class="button control" type="submit"><span
+                                class="material-icons">send</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+
+<script>
+    (() => {
+        var converter = new showdown.Converter();
+
+        document.getElementById("question").addEventListener("keydown", (event) => {
+            if (event.keyCode === 13 && !event.shiftKey) {
+                event.preventDefault();
+                askGemini();
+            }
+            if (event.keycode === 13 && event.shiftKey) {
+
+            }
+        });
+
+        let scrollToBottom = () => {
+
+        }
+
+        let addMessage = (message, sender, id) => {
+            let messages = document.getElementById("messages");
+            const newMessage = document.createElement("article");
+            const newMessageHeader = document.createElement("div");
+            const newMessageBody = document.createElement("div");
+
+            newMessage.classList.add("message");
+            newMessageHeader.classList.add("message-header");
+            newMessageHeader.innerText = sender;
+            newMessageBody.classList.add("message-body");
+            newMessageBody.classList.add("content");
+            newMessageBody.innerHTML = DOMPurify.sanitize(converter.makeHtml(message));
+            newMessageBody.setAttribute("id", id);
+
+            newMessage.appendChild(newMessageHeader)
+            newMessage.appendChild(newMessageBody)
+
+            messages.insertAdjacentElement("beforeend", newMessage)
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        let askGemini = async () => {
+            question = document.getElementById("question").value;
+            if (!question.trim()) return;
+
+            document.getElementById("send").classList.add("is-loading");
+            document.getElementById("question").value = "";
+
+            const formData = new FormData();
+            formData.append("question", question.trim());
+
+            const messageID = Date.now();
+            addMessage(question, "You", "")
+            addMessage("", "Gemini", messageID)
+
+            const response = await fetch("/api/ask?chat={{ idtostring .Chat.ID }}", {
+                method: "POST",
+                body: formData,
+            })
+            const reader = response.body.getReader();
+
+            let answer = "";
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                const text = new TextDecoder().decode(value);
+                answer += text;
+
+
+                document.getElementById(messageID).innerHTML = DOMPurify.sanitize(converter.makeHtml(answer));
+                document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
+                console.log(text);
+            }
+
+            document.getElementById("send").classList.remove("is-loading");
+        }
+    })();
+</script>
+
+</html>

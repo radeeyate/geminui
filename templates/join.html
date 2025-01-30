@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeminUI - Join</title>
+  <link rel="stylesheet" href="/static/bulma.css" />
+</head>
+
+<body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">GeminUI - Join</h1>
+      <form method="POST" action="/join">
+        <div class="field">
+          <label for="email" class="label">Email</label>
+          <input type="text" id="email" name="email" placeholder="Student Email" class="input" required />
+        </div>
+        <div class="field">
+          <label for="id" class="label">Student ID</label>
+          <input type="number" id="id" name="id" placeholder="Student ID" class="input" required />
+        </div>
+        <div class="field">
+          <label for="id" class="label">Name</label>
+          <input type="text" id="name" name="name" placeholder="Name" class="input" required />
+        </div>
+
+        {{ if .Error }}
+        <p class="has-text-danger">{{ .Error }}</p>
+        {{ end }}
+
+        <div class="control">
+          <button type="submit" class="button">Join</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</body>
+
+</html>
