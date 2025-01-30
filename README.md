@@ -1,4 +1,4 @@
-# geminui
+# GeminUI
 
 **Warning:** This is not a production-ready application. I have not had the time to develop it into a fully fledged web app, but I hope to do that in the future.
 
