@@ -32,7 +32,7 @@ This is the format of the `.env` file:
 GEMINI_API_KEY = "your gemini api key"
 CONNECTION_STRING="your mongodb connection string"
 SECRET="a2ed92392e2bc1fa34ba84f3755... you can put whatever you want in here. make it secure."
-EMAIL_DOMAIN = "gmail.com" # this would let gmail addresses make accounts
+EMAIL_DOMAIN = "gmail.com"
 MAILJET_PUBLIC = "your mailjet public key"
 MAILJET_PRIVATE = "your mailjet private key"
 EMAIL_SENDER = "your sender address (e.g. noreply@yourdomain.com)"
